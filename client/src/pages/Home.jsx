@@ -105,9 +105,17 @@ export default function Home() {
     whileHover={{ scale: 1.08 }}
     whileTap={{ scale: 0.95 }}
   >
-    <button className="bg-blue-600 text-white px-4 py-2 rounded hover:scale-105 transition duration-300">
-  Explore Properties
-</button>
+    <Link
+      to="/search"
+      className="px-8 py-3 bg-white text-slate-900 rounded-xl font-semibold shadow-lg 
+      hover:bg-yellow-400 hover:text-black 
+      transition-all duration-300"
+      style={{
+        boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+      }}
+    >
+      Explore Properties →
+    </Link>
   </motion.div>
 </motion.div>
 
