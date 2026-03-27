@@ -79,9 +79,9 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="text-4xl md:text-6xl font-semibold leading-tight"
           >
-            Find your dream home{' '}
+            Find your next{' '}
             <span className="text-yellow-400 font-bold">perfect</span>{' '}
-            with TricityEstates
+            place to live
           </motion.h1>
 
           {/* 🔥 SUBTEXT */}
@@ -105,17 +105,9 @@ export default function Home() {
     whileHover={{ scale: 1.08 }}
     whileTap={{ scale: 0.95 }}
   >
-    <Link
-      to="/search"
-      className="px-8 py-3 bg-white text-slate-900 rounded-xl font-semibold shadow-lg 
-      hover:bg-yellow-400 hover:text-black 
-      transition-all duration-300"
-      style={{
-        boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-      }}
-    >
-      Explore Properties →
-    </Link>
+    <button className="bg-blue-600 text-white px-4 py-2 rounded hover:scale-105 transition duration-300">
+  Explore Properties
+</button>
   </motion.div>
 </motion.div>
 
