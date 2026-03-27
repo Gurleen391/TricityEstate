@@ -98,7 +98,7 @@ export default function About() {
             href='/search'
             className='bg-white text-slate-900 px-6 py-2 rounded-lg font-semibold hover:bg-slate-200 transition'
           >
-            Explore Now
+            Explore tricity estates
           </a>
         </div>
 
