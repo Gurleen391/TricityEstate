@@ -79,9 +79,9 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="text-4xl md:text-6xl font-semibold leading-tight"
           >
-            Find your next{' '}
+            Find your dream home{' '}
             <span className="text-yellow-400 font-bold">perfect</span>{' '}
-            place to live
+            with TricityEstates
           </motion.h1>
 
           {/* 🔥 SUBTEXT */}
