@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
-export default function Contact({ listing }) {
+export default function Contact({ listing, onClose, onSuccess }) {
   const [landlord, setLandlord] = useState(null);
   const [message, setMessage] = useState('');
+
   const onChange = (e) => {
     setMessage(e.target.value);
   };
@@ -13,38 +13,62 @@ export default function Contact({ listing }) {
       try {
         const res = await fetch(`/api/user/${listing.userRef}`);
         const data = await res.json();
+        if (data.success === false) return;
         setLandlord(data);
       } catch (error) {
         console.log(error);
       }
     };
-    fetchLandlord();
-  }, [listing.userRef]);
+
+    if (listing?.userRef) {
+      fetchLandlord();
+    }
+  }, [listing?.userRef]);
+
+  const handleSend = () => {
+    if (!message) {
+      alert('Please enter a message');
+      return;
+    }
+
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${landlord.email}&su=${encodeURIComponent(
+      `Regarding ${listing.name}`
+    )}&body=${encodeURIComponent(message)}`;
+
+    window.open(url, '_blank', 'width=600,height=600');
+
+    setMessage('');
+
+    onClose();   // ✅ close modal
+    onSuccess(); // ✅ trigger success popup
+  };
+
   return (
     <>
       {landlord && (
-        <div className='flex flex-col gap-2'>
+        <div className="flex flex-col gap-3">
           <p>
-            Contact <span className='font-semibold'>{landlord.username}</span>{' '}
-            for{' '}
-            <span className='font-semibold'>{listing.name.toLowerCase()}</span>
+            Contact{' '}
+            <span className="font-semibold">{landlord.username}</span> for{' '}
+            <span className="font-semibold">
+              {listing.name.toLowerCase()}
+            </span>
           </p>
+
           <textarea
-            name='message'
-            id='message'
-            rows='2'
+            rows="3"
             value={message}
             onChange={onChange}
-            placeholder='Enter your message here...'
-            className='w-full border p-3 rounded-lg'
-          ></textarea>
+            placeholder="Enter your message here..."
+            className="w-full border p-3 rounded-lg"
+          />
 
-          <Link
-          to={`mailto:${landlord.email}?subject=Regarding ${listing.name}&body=${message}`}
-          className='bg-slate-700 text-white text-center p-3 uppercase rounded-lg hover:opacity-95'
+          <button
+            onClick={handleSend}
+            className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95"
           >
-            Send Message          
-          </Link>
+            Send Message
+          </button>
         </div>
       )}
     </>

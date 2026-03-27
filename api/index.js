@@ -1,15 +1,17 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: "./api/.env" });
+console.log("MONGO_URL:", process.env.MONGO_URL);
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import userRouter from './routes/user.route.js';
 import authRouter from './routes/auth.route.js';
 import listingRouter from './routes/listing.route.js';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-dotenv.config();
+
 
 mongoose
-  .connect(process.env.MONGO)
+  .connect(process.env.MONGO_URL)
   .then(() => {
     console.log('Connected to MongoDB!');
   })

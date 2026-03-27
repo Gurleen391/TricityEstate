@@ -10,11 +10,18 @@ import CreateListing from './pages/CreateListing';
 import UpdateListing from './pages/UpdateListing';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
+import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 
 export default function App() {
   return (
     <BrowserRouter>
+
+      {/* ✅ ADD THIS (IMPORTANT) */}
+      <ScrollToTop />
+
       <Header />
+
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/sign-in' element={<SignIn />} />
@@ -32,6 +39,9 @@ export default function App() {
           />
         </Route>
       </Routes>
+
+      <Footer />
+      
     </BrowserRouter>
   );
 }
