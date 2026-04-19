@@ -9,6 +9,7 @@ export default function Search() {
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
+    propertyType: "", // ✅ ADDED
     parking: false,
     furnished: false,
     offer: false,
@@ -20,7 +21,7 @@ export default function Search() {
   const [listings, setListings] = useState([]);
   const [showMore, setShowMore] = useState(false);
 
-  // ✅ FETCH LISTINGS FROM URL
+  // ✅ FETCH DATA FROM URL
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
 
@@ -41,22 +42,22 @@ export default function Search() {
       }
     };
 
-    // ✅ IMPORTANT: preserve previous state (fix dropdown reset)
     setSidebardata((prev) => ({
       ...prev,
       searchTerm: urlParams.get("searchTerm") || "",
       type: urlParams.get("type") || "all",
+      propertyType: urlParams.get("propertyType") || "", // ✅ IMPORTANT
       parking: urlParams.get("parking") === "true",
       furnished: urlParams.get("furnished") === "true",
       offer: urlParams.get("offer") === "true",
-      sort: urlParams.get("sort") || prev.sort,
-      order: urlParams.get("order") || prev.order,
+      sort: urlParams.get("sort") || "createdAt",
+      order: urlParams.get("order") || "desc",
     }));
 
     fetchListings();
   }, [location.search]);
 
-  // ✅ HANDLE INPUT CHANGE
+  // ✅ HANDLE INPUT
   const handleChange = (e) => {
     if (e.target.name === "type") {
       setSidebardata((prev) => ({
@@ -79,10 +80,8 @@ export default function Search() {
       }));
     }
 
-    // ✅ FIXED DROPDOWN (IMPORTANT)
     if (e.target.id === "sort_order") {
-      const value = e.target.value;
-      const [sort, order] = value.split("_");
+      const [sort, order] = e.target.value.split("_");
 
       setSidebardata((prev) => ({
         ...prev,
@@ -92,26 +91,36 @@ export default function Search() {
     }
   };
 
-  // ✅ HANDLE SUBMIT
+  // ✅ HANDLE SUBMIT (FIXED)
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const urlParams = new URLSearchParams();
+    // 🔥 IMPORTANT: preserve existing filters
+    const urlParams = new URLSearchParams(location.search);
 
     if (sidebardata.searchTerm)
       urlParams.set("searchTerm", sidebardata.searchTerm);
+    else urlParams.delete("searchTerm");
 
     if (sidebardata.type !== "all")
       urlParams.set("type", sidebardata.type);
+    else urlParams.delete("type");
+
+    // ✅ KEEP PROPERTY TYPE FROM DROPDOWN
+    if (sidebardata.propertyType)
+      urlParams.set("propertyType", sidebardata.propertyType);
 
     if (sidebardata.parking)
       urlParams.set("parking", true);
+    else urlParams.delete("parking");
 
     if (sidebardata.furnished)
       urlParams.set("furnished", true);
+    else urlParams.delete("furnished");
 
     if (sidebardata.offer)
       urlParams.set("offer", true);
+    else urlParams.delete("offer");
 
     urlParams.set("sort", sidebardata.sort);
     urlParams.set("order", sidebardata.order);
@@ -137,7 +146,7 @@ export default function Search() {
   return (
     <div className="flex flex-col md:flex-row">
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR (UNCHANGED UI) */}
       <div className="p-7 border-b-2 md:border-r-2 md:min-h-screen">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
 
