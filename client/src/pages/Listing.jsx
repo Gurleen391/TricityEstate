@@ -187,27 +187,21 @@ export default function Listing() {
             </div>
 
             {/* MAP */}
-            {/* MAP */}
-<div className='w-full md:w-[400px] h-[300px] sticky top-24'>
-  <MapContainer
-    center={position}
-    zoom={13}
-    className='h-full w-full rounded-lg shadow-lg'
-  >
-    <TileLayer
-      attribution='&copy; OpenStreetMap contributors'
-      url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-    />
-
-    {/* ✅ FIXED MARKER */}
-    <Marker position={position}>
-      <Popup closeButton={false}>
-        {listing.address}
-      </Popup>
-    </Marker>
-
-  </MapContainer>
-</div>
+            <div className='w-full md:w-[400px] h-[300px] sticky top-24'>
+              <MapContainer
+                center={position}
+                zoom={13}
+                className='h-full w-full rounded-lg shadow-lg'
+              >
+                <TileLayer
+                  attribution='&copy; OpenStreetMap contributors'
+                  url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                />
+                <Marker position={position}>
+                  <Popup>{listing.address}</Popup>
+                </Marker>
+              </MapContainer>
+            </div>
           </div>
 
           {/* CONTACT MODAL */}
