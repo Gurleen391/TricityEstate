@@ -6,10 +6,13 @@ export default function Search() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ ADD YOUR LIVE API URL
+  const API_URL = "https://tricityestate.onrender.com";
+
   const [sidebardata, setSidebardata] = useState({
     searchTerm: "",
     type: "all",
-    propertyType: "", // ✅ ADDED
+    propertyType: "",
     parking: false,
     furnished: false,
     offer: false,
@@ -30,14 +33,16 @@ export default function Search() {
         setLoading(true);
         setShowMore(false);
 
-        const res = await fetch(`/api/listing/get?${urlParams.toString()}`);
+        console.log("Fetching with params:", urlParams.toString());
+
+        const res = await fetch(`${API_URL}/api/listing/get?${urlParams.toString()}`);
         const data = await res.json();
 
         setListings(data);
         setShowMore(data.length > 8);
         setLoading(false);
       } catch (error) {
-        console.log(error);
+        console.log("FETCH ERROR:", error);
         setLoading(false);
       }
     };
@@ -46,7 +51,7 @@ export default function Search() {
       ...prev,
       searchTerm: urlParams.get("searchTerm") || "",
       type: urlParams.get("type") || "all",
-      propertyType: urlParams.get("propertyType") || "", // ✅ IMPORTANT
+      propertyType: urlParams.get("propertyType") || "",
       parking: urlParams.get("parking") === "true",
       furnished: urlParams.get("furnished") === "true",
       offer: urlParams.get("offer") === "true",
@@ -57,8 +62,10 @@ export default function Search() {
     fetchListings();
   }, [location.search]);
 
-  // ✅ HANDLE INPUT
+  // ✅ HANDLE INPUT (FIXED)
   const handleChange = (e) => {
+
+    // TYPE
     if (e.target.name === "type") {
       setSidebardata((prev) => ({
         ...prev,
@@ -66,6 +73,7 @@ export default function Search() {
       }));
     }
 
+    // SEARCH
     if (e.target.id === "searchTerm") {
       setSidebardata((prev) => ({
         ...prev,
@@ -73,6 +81,15 @@ export default function Search() {
       }));
     }
 
+    // PROPERTY TYPE ✅ FIXED
+    if (e.target.id === "propertyType") {
+      setSidebardata((prev) => ({
+        ...prev,
+        propertyType: e.target.value,
+      }));
+    }
+
+    // CHECKBOXES
     if (["parking", "furnished", "offer"].includes(e.target.id)) {
       setSidebardata((prev) => ({
         ...prev,
@@ -80,6 +97,7 @@ export default function Search() {
       }));
     }
 
+    // SORT
     if (e.target.id === "sort_order") {
       const [sort, order] = e.target.value.split("_");
 
@@ -91,36 +109,29 @@ export default function Search() {
     }
   };
 
-  // ✅ HANDLE SUBMIT (FIXED)
+  // ✅ HANDLE SUBMIT
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // 🔥 IMPORTANT: preserve existing filters
-    const urlParams = new URLSearchParams(location.search);
+    const urlParams = new URLSearchParams();
 
     if (sidebardata.searchTerm)
       urlParams.set("searchTerm", sidebardata.searchTerm);
-    else urlParams.delete("searchTerm");
 
     if (sidebardata.type !== "all")
       urlParams.set("type", sidebardata.type);
-    else urlParams.delete("type");
 
-    // ✅ KEEP PROPERTY TYPE FROM DROPDOWN
     if (sidebardata.propertyType)
       urlParams.set("propertyType", sidebardata.propertyType);
 
     if (sidebardata.parking)
       urlParams.set("parking", true);
-    else urlParams.delete("parking");
 
     if (sidebardata.furnished)
       urlParams.set("furnished", true);
-    else urlParams.delete("furnished");
 
     if (sidebardata.offer)
       urlParams.set("offer", true);
-    else urlParams.delete("offer");
 
     urlParams.set("sort", sidebardata.sort);
     urlParams.set("order", sidebardata.order);
@@ -135,7 +146,7 @@ export default function Search() {
     const urlParams = new URLSearchParams(location.search);
     urlParams.set("startIndex", startIndex);
 
-    const res = await fetch(`/api/listing/get?${urlParams.toString()}`);
+    const res = await fetch(`${API_URL}/api/listing/get?${urlParams.toString()}`);
     const data = await res.json();
 
     setListings((prev) => [...prev, ...data]);
@@ -146,7 +157,7 @@ export default function Search() {
   return (
     <div className="flex flex-col md:flex-row">
 
-      {/* SIDEBAR (UNCHANGED UI) */}
+      {/* SIDEBAR */}
       <div className="p-7 border-b-2 md:border-r-2 md:min-h-screen">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
 
@@ -156,83 +167,47 @@ export default function Search() {
             <input
               type="text"
               id="searchTerm"
-              placeholder="Search..."
               className="border rounded-lg p-3 w-full"
               value={sidebardata.searchTerm}
               onChange={handleChange}
             />
           </div>
 
+          {/* ✅ PROPERTY TYPE DROPDOWN (ADDED UI FIX) */}
+          <div className="flex items-center gap-2">
+            <label className="font-semibold">Property Type:</label>
+            <select
+              id="propertyType"
+              value={sidebardata.propertyType}
+              onChange={handleChange}
+              className="border rounded-lg p-3"
+            >
+              <option value="">All</option>
+              <option value="apartment">Apartment</option>
+              <option value="villa">Villa</option>
+              <option value="farmhouse">Farmhouse</option>
+            </select>
+          </div>
+
           {/* TYPE */}
           <div className="flex gap-2 flex-wrap items-center">
             <label className="font-semibold">Type:</label>
 
-            <label className="flex gap-2">
-              <input type="radio" name="type" id="all"
-                checked={sidebardata.type === "all"}
-                onChange={handleChange} />
-              Rent & Sale
-            </label>
+            <input type="radio" name="type" id="all"
+              checked={sidebardata.type === "all"}
+              onChange={handleChange} /> All
 
-            <label className="flex gap-2">
-              <input type="radio" name="type" id="rent"
-                checked={sidebardata.type === "rent"}
-                onChange={handleChange} />
-              Rent
-            </label>
+            <input type="radio" name="type" id="rent"
+              checked={sidebardata.type === "rent"}
+              onChange={handleChange} /> Rent
 
-            <label className="flex gap-2">
-              <input type="radio" name="type" id="sale"
-                checked={sidebardata.type === "sale"}
-                onChange={handleChange} />
-              Sale
-            </label>
-
-            <label className="flex gap-2">
-              <input type="checkbox" id="offer"
-                checked={sidebardata.offer}
-                onChange={handleChange} />
-              Offer
-            </label>
+            <input type="radio" name="type" id="sale"
+              checked={sidebardata.type === "sale"}
+              onChange={handleChange} /> Sale
           </div>
 
-          {/* AMENITIES */}
-          <div className="flex gap-2 flex-wrap items-center">
-            <label className="font-semibold">Amenities:</label>
-
-            <label className="flex gap-2">
-              <input type="checkbox" id="parking"
-                checked={sidebardata.parking}
-                onChange={handleChange} />
-              Parking
-            </label>
-
-            <label className="flex gap-2">
-              <input type="checkbox" id="furnished"
-                checked={sidebardata.furnished}
-                onChange={handleChange} />
-              Furnished
-            </label>
-          </div>
-
-          {/* SORT */}
-          <div className="flex items-center gap-2">
-            <label className="font-semibold">Sort:</label>
-
-            <select
-              id="sort_order"
-              value={`${sidebardata.sort}_${sidebardata.order}`}
-              onChange={handleChange}
-              className="border rounded-lg p-3"
-            >
-              <option value="regularPrice_desc">Price high to low</option>
-              <option value="regularPrice_asc">Price low to high</option>
-              <option value="createdAt_desc">Latest</option>
-              <option value="createdAt_asc">Oldest</option>
-            </select>
-          </div>
-
-          <button className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95">
+          {/* SUBMIT */}
+          <button className="bg-slate-700 text-white p-3 rounded-lg">
             Search
           </button>
         </form>
@@ -240,19 +215,13 @@ export default function Search() {
 
       {/* RESULTS */}
       <div className="flex-1">
-        <h1 className="text-3xl font-semibold border-b p-3 text-slate-700 mt-5">
-          Listing results:
-        </h1>
-
         <div className="p-7 flex flex-wrap gap-4">
 
           {!loading && listings.length === 0 && (
-            <p className="text-xl">No listing found!</p>
+            <p>No listing found!</p>
           )}
 
-          {loading && (
-            <p className="text-xl text-center w-full">Loading...</p>
-          )}
+          {loading && <p>Loading...</p>}
 
           {!loading &&
             listings.map((listing) => (
@@ -260,10 +229,7 @@ export default function Search() {
             ))}
 
           {showMore && (
-            <button
-              onClick={onShowMoreClick}
-              className="text-green-700 hover:underline p-7 w-full"
-            >
+            <button onClick={onShowMoreClick}>
               Show more
             </button>
           )}
