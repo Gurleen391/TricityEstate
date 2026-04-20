@@ -200,11 +200,11 @@ export default function Listing() {
     />
 
     {/* ✅ FIXED MARKER */}
-    <Marker position={position}>
+/*    <Marker position={position}>
       <Popup closeButton={false}>
         {listing.address}
       </Popup>
-    </Marker>
+    </Marker> */
 
   </MapContainer>
 </div>
