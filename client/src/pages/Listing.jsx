@@ -5,6 +5,7 @@ import SwiperCore from 'swiper';
 import { useSelector } from 'react-redux';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css/bundle';
+import { useMap } from "react-leaflet";
 import {
   FaBath,
   FaBed,
@@ -17,6 +18,11 @@ import Contact from '../components/Contact';
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 
+function ChangeMapView({ center }) {
+  const map = useMap();
+  map.setView(center);
+  return null;
+}
 export default function Listing() {
   SwiperCore.use([Navigation]);
 
@@ -192,23 +198,24 @@ export default function Listing() {
             {/* MAP */}
 <div className='w-full md:w-[400px] h-[300px] sticky top-24'>
   <MapContainer
-    center={position}
-    zoom={13}
-    className='h-full w-full rounded-lg shadow-lg'
-  >
-    <TileLayer
-      attribution='&copy; OpenStreetMap contributors'
-      url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-    />
+  center={position}
+  zoom={13}
+  className='h-full w-full rounded-lg shadow-lg'
+>
+  <TileLayer
+    attribution='&copy; OpenStreetMap contributors'
+    url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  />
 
-    {/* ✅ FIXED MARKER */}
-    <Marker position={position}>
-      <Popup closeButton={false}>
-        {listing.address}
-      </Popup>
-    </Marker>
+  {/* ✅ FIX: force map center update */}
+  <ChangeMapView center={position} />
 
-  </MapContainer>
+  <Marker position={position}>
+    <Popup closeButton={false}>
+      {listing.address}
+    </Popup>
+  </Marker>
+</MapContainer>
 </div>
           </div>
 
