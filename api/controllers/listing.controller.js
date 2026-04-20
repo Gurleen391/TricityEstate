@@ -1,17 +1,50 @@
 import Listing from "../models/listing.model.js";
 import { errorHandler } from "../utils/error.js";
+import fetch from "node-fetch"; // ✅ REQUIRED
 
+// ✅ FUNCTION: Convert address → coordinates
+const getCoordinates = async (address) => {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${address}`
+  );
+
+  const data = await res.json();
+
+  if (!data || data.length === 0) {
+    throw new Error("Invalid address");
+  }
+
+  return {
+    latitude: parseFloat(data[0].lat),
+    longitude: parseFloat(data[0].lon),
+  };
+};
+
+// ======================================================
 // CREATE LISTING
+// ======================================================
 export const createListing = async (req, res, next) => {
   try {
-    const listing = await Listing.create(req.body);
+    const { address } = req.body;
+
+    // ✅ Convert address → lat/lng
+    const coords = await getCoordinates(address);
+
+    const listing = await Listing.create({
+      ...req.body,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    });
+
     return res.status(201).json(listing);
   } catch (error) {
     next(error);
   }
 };
 
+// ======================================================
 // DELETE LISTING
+// ======================================================
 export const deleteListing = async (req, res, next) => {
   try {
     const listing = await Listing.findById(req.params.id);
@@ -31,7 +64,9 @@ export const deleteListing = async (req, res, next) => {
   }
 };
 
-// UPDATE LISTING
+// ======================================================
+// UPDATE LISTING (UPDATED FOR MAP)
+// ======================================================
 export const updateListing = async (req, res, next) => {
   try {
     const listing = await Listing.findById(req.params.id);
@@ -44,9 +79,18 @@ export const updateListing = async (req, res, next) => {
       return next(errorHandler(401, "You can update only your own listings"));
     }
 
+    let updatedData = { ...req.body };
+
+    // ✅ If address is updated → update coordinates too
+    if (req.body.address) {
+      const coords = await getCoordinates(req.body.address);
+      updatedData.latitude = coords.latitude;
+      updatedData.longitude = coords.longitude;
+    }
+
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updatedData,
       { new: true }
     );
 
@@ -56,7 +100,9 @@ export const updateListing = async (req, res, next) => {
   }
 };
 
+// ======================================================
 // GET SINGLE LISTING
+// ======================================================
 export const getListing = async (req, res, next) => {
   try {
     const listing = await Listing.findById(req.params.id);
@@ -71,27 +117,25 @@ export const getListing = async (req, res, next) => {
   }
 };
 
-// ✅ GET / SEARCH LISTINGS (FINAL FIXED)
+// ======================================================
+// GET / SEARCH LISTINGS (UNCHANGED)
+// ======================================================
 export const getListings = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 9;
     const startIndex = parseInt(req.query.startIndex) || 0;
 
-    // ✅ BOOLEAN FILTERS (cleaned logic)
     const offer = req.query.offer === "true";
     const furnished = req.query.furnished === "true";
     const parking = req.query.parking === "true";
 
-    // ✅ TYPE FILTER
     const type =
       req.query.type && req.query.type !== "all"
         ? req.query.type
         : { $in: ["sale", "rent"] };
 
-    // ✅ SEARCH TERM
     const searchTerm = req.query.searchTerm || "";
 
-    // ✅ PROPERTY TYPE DETECTION
     const normalizedSearch = searchTerm.toLowerCase().replace(/\s+/g, "");
     let propertyTypeFilter = {};
 
@@ -103,15 +147,9 @@ export const getListings = async (req, res, next) => {
       propertyTypeFilter = { propertyType: "studio" };
     }
 
-    // ✅ SORT FIX (FINAL)
     const sort = req.query.sort || "createdAt";
     const order = req.query.order === "asc" ? 1 : -1;
 
-    // 🔥 DEBUG (REMOVE AFTER TEST)
-    console.log("SORT:", sort);
-    console.log("ORDER:", order);
-
-    // ✅ BUILD QUERY OBJECT (clean + dynamic)
     const query = {
       type,
       $and: [
@@ -126,14 +164,12 @@ export const getListings = async (req, res, next) => {
       ],
     };
 
-    // ✅ APPLY BOOLEAN FILTERS ONLY IF TRUE
     if (offer) query.offer = true;
     if (furnished) query.furnished = true;
     if (parking) query.parking = true;
 
-    // ✅ FINAL QUERY
     const listings = await Listing.find(query)
-      .sort({ [sort]: order }) // 🔥 MAIN FIX
+      .sort({ [sort]: order })
       .limit(limit)
       .skip(startIndex);
 
