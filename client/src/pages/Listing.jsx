@@ -74,9 +74,7 @@ export default function Listing() {
     document.body.style.overflow = contact ? 'hidden' : 'auto';
   }, [contact]);
 
- const position = listing?.latitude && listing?.longitude
-  ? [listing.latitude, listing.longitude]
-  : [28.6139, 77.2090];
+ const [position, setPosition] = useState([28.6139, 77.2090]);
 
   return (
     <main>
