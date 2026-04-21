@@ -70,6 +70,13 @@ export default function Listing() {
     fetchListing();
   }, [params.listingId]);
 
+useEffect(() => {
+  if (listing && listing.latitude && listing.longitude) {
+    setPosition([listing.latitude, listing.longitude]);
+  }
+}, [listing]);
+
+
   useEffect(() => {
     document.body.style.overflow = contact ? 'hidden' : 'auto';
   }, [contact]);
